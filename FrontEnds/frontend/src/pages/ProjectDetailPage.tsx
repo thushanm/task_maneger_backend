@@ -124,9 +124,11 @@ const ProjectDetailPage = () => {
                 <Typography variant="h4" gutterBottom component="div">
                     Tasks
                 </Typography>
-                <Button variant="contained" startIcon={<AddIcon />} onClick={() => handleOpenDialog()}>
-                    Create Task
-                </Button>
+                {user?.role === 'admin' && (
+                    <Button variant="contained" startIcon={<AddIcon />} onClick={() => handleOpenDialog()}>
+                        Create Task
+                    </Button>
+                )}
             </Box>
 
             {loading && <Box display="flex" justifyContent="center" sx={{ my: 4 }}><CircularProgress /></Box>}
