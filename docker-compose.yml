@@ -1,0 +1,40 @@
+services:
+  db:
+    image: mysql:8.0
+    cap_add:
+      - SYS_NICE
+    restart: always
+    environment:
+      MYSQL_DATABASE: projects_tasks_db
+      MYSQL_ROOT_PASSWORD: '1234'
+    ports:
+      - '3307:3306'
+    volumes:
+      - db-data:/var/lib/mysql
+
+  api:
+    build: ./api
+    ports:
+      - "3001:3001"
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_USER: root
+      DB_PASSWORD: '1234'
+      DB_NAME: projects_tasks_db
+      PORT: 3001
+      JWT_SECRET: a8f5b1f3b1e3e4a8c2d4e7f8a1b3c5d6e8f0a2b4c6d7e9f1a3b5c7d9e2f4a6b8
+
+  frontend:
+    build: ./FrontEnds/frontend
+    container_name: task-manager-frontend
+    ports:
+      - "5173:5173"
+    restart: always
+    depends_on:
+      - api
+
+volumes:
+  db-data:
+
