@@ -1,6 +1,6 @@
 import React from 'react';
-import { Task, TaskStatus, User } from '../types';
-import { useAuth } from '../hooks/useAuth';
+import { Task, TaskStatus } from '../types/index.ts';
+import { useAuth } from '../hooks/useAuth.ts';
 import {
     ListItem, ListItemText, Select, MenuItem, FormControl, Box, Typography, IconButton
 } from '@mui/material';
@@ -17,7 +17,10 @@ interface TaskItemProps {
 const TaskItem: React.FC<TaskItemProps> = ({ task, onUpdateStatus, onEdit, onDelete }) => {
     const { user } = useAuth();
 
-    const canModify = user?.role === 'admin' || user?.id === task.assignee_user_id;
+    // Members can change status only if they are the assignee
+    const canChangeStatus = user?.role === 'admin' || user?.id === task.assignee_user_id;
+    // Only admins can edit the title/assignee or delete the task
+    const canEditOrDelete = user?.role === 'admin';
 
     return (
         <ListItem
@@ -25,13 +28,19 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onUpdateStatus, onEdit, onDel
             secondaryAction={
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <FormControl size="small" sx={{minWidth: 120}}>
-                        <Select value={task.status} onChange={(e) => onUpdateStatus(task.id, e.target.value as TaskStatus, task.version)}>
+                        <Select
+                            value={task.status}
+                            onChange={(e) => onUpdateStatus(task.id, e.target.value as TaskStatus, task.version)}
+                            disabled={!canChangeStatus} // The dropdown is disabled if the user can't change status
+                        >
                             <MenuItem value="todo">To Do</MenuItem>
                             <MenuItem value="in_progress">In Progress</MenuItem>
                             <MenuItem value="done">Done</MenuItem>
                         </Select>
                     </FormControl>
-                    {canModify && (
+
+                    {/* Edit and Delete buttons are now only rendered for admins */}
+                    {canEditOrDelete && (
                         <>
                             <IconButton edge="end" aria-label="edit" onClick={() => onEdit(task)}>
                                 <EditIcon />
